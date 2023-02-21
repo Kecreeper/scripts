@@ -1,0 +1,95 @@
+--[[
+R15
+--]]
+
+
+local lp = game.Players.LocalPlayer
+local m = lp:GetMouse()
+local c = lp.Character
+local h = c.Humanoid
+local ra = c["RightHand"]
+local raA = Instance.new("Attachment", ra)
+raA.CFrame = CFrame.new(0,-1,0)
+local hrp = c.HumanoidRootPart
+local hrpA = Instance.new("Attachment", hrp)
+
+local active = false
+local target = Instance.new("Part", workspace)
+target.Size = Vector3.new(0.5,0.5,0.5)
+target.Shape = Enum.PartType.Ball
+target.Color = Color3.fromRGB(255,255,255)
+target.Anchored = true
+local a0 = Instance.new("Attachment", target)
+
+local rc = Instance.new("RopeConstraint")
+rc.Parent = target
+rc.Attachment0 = a0
+
+local beam = Instance.new("Beam")
+beam.Parent = ra
+beam.FaceCamera = true
+beam.Width0 = 0.1
+beam.Width1 = 0.1
+beam.Attachment0 = raA
+
+local Sound = Instance.new("Sound")
+Sound.SoundId = "rbxassetid://576652617"
+Sound.Parent = hrp
+
+local force = Instance.new("BodyForce")
+
+local anim = Instance.new("Animation")
+anim.AnimationId = "rbxassetid://12173620577"
+local currentAnim = h:LoadAnimation(anim)
+
+local keyin = m.KeyDown:Connect(function(key)
+	if key:lower() == "r" then
+		active = true
+		target.Position = m.Hit.p
+		rc.Length = (target.Position-hrp.Position).magnitude
+		rc.Attachment1 = hrpA
+		beam.Attachment1 = a0
+		force.Parent = hrp
+		workspace.Gravity = 100
+		currentAnim:Play()
+		Sound:Play()
+		h.PlatformStand = true
+	end
+end)
+
+
+local keyout = m.KeyUp:Connect(function(key)
+	if key:lower() == "r" then
+		active = false
+		rc.Attachment1 = nil
+		beam.Attachment1 = nil
+		force.Parent = workspace
+		currentAnim:Stop()
+		h.PlatformStand = false
+		wait(1)
+		BG:Destroy()
+		workspace.Gravity = 145
+	end
+end)
+
+local cam = workspace.CurrentCamera
+local Stepped = game.RunService.Stepped
+
+local pipe = Stepped:Connect(function()
+	if rc.Length > 1 and rc.Attachment1 ~= nil then
+		rc.Length -= 0.1
+		force.Force = cam.CFrame.LookVector * Vector3.new(150,0,150)
+		Stepped:Wait()
+	end
+end)
+
+h.Died:Connect(function()
+	wait(2)
+	pipe:Disconnect()
+	keyin:Disconnect()
+	keyout:Disconnect()
+	target:Destroy()
+	workspace.Gravity = 196.2
+end)
+
+game.StarterGui:SetCore("SendNotification", {Title = "Spider Web by Gilbert", Text = "Loaded"})
