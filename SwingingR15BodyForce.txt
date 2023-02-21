@@ -92,4 +92,4 @@ h.Died:Connect(function()
 	workspace.Gravity = 196.2
 end)
 
-game.StarterGui:SetCore("SendNotification", {Title = "Spider Web by Gilbert", Text = "Loaded"})
+game.StarterGui:SetCore("SendNotification", {Title = "Web Swinging", Text = "Loaded"})
